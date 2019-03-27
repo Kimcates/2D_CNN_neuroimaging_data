@@ -5,7 +5,7 @@
 """
 Loads NIFTI files and cdr info for each file in from nilearn.
 Preprocesses this data for use in classification model.
-Creates four files: "gm_imgs_train", "gm_imgs_test", "cdr_train", and "cdr_test"
+Creates four files using pickle: "gm_imgs_train", "gm_imgs_test", "cdr_train", and "cdr_test"
 """
 # Preliminaries
 import numpy as np
