@@ -12,11 +12,9 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import cv2
-from nilearn import datasets
+from nilearn import datasets, image, plotting
 from sklearn.utils import check_random_state
 from sklearn.model_selection import train_test_split
-from nilearn import image
-from nilearn import plotting
 import pickle
 
 # download oasis dataset
@@ -38,13 +36,13 @@ cdr = oasis_dataset.ext_vars['cdr'].astype(float)
 cdr_numpy_arr = np.array(cdr)
 
 #the directory that the NIFTI images will be saved to
-data_dir = 'C:\\NiData'
+data_dir = 'C:\\Nidata'
 
 def NIFTI_to_PNG(path_list, dir):
     """
     :param  LOS  path_list: the list of paths to NIFTI images
     :param  string  dir: a specified path to create directory
-    NIFTI_to_PNG: creates a directory to sace NIFTI images as png files
+    NIFTI_to_PNG: creates a directory to save NIFTI images as png files
                 If the directory already exists, then that part is skipped.
     """
     ## Create location for NIFTI images to be saved
@@ -57,7 +55,7 @@ def NIFTI_to_PNG(path_list, dir):
     count = 0 # a count of the files saved so far
     for path in gm_img_paths:
         fig = plotting.plot_anat(path, display_mode = 'x', annotate= False, cut_coords = [40])
-        fig.savefig(data_dir + 'brain' + str(count + 1) + '.png')
+        fig.savefig(dir + '\\' + 'brain' + str(count + 1) + '.png')
         count += 1
         fig.close()
 
