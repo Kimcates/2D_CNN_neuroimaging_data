@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-#Oasis_test_train:
 """
+Oasis_test_train:
 Loads NIFTI files and cdr info for each file in from nilearn.
 Preprocesses this data for use in classification model.
 Creates four files using pickle: "gm_imgs_train", "gm_imgs_test", "cdr_train", and "cdr_test"
@@ -10,12 +10,12 @@ Creates four files using pickle: "gm_imgs_train", "gm_imgs_test", "cdr_train", a
 # Preliminaries
 import numpy as np
 import os
-import matplotlib.pyplot as plt
 import cv2
 from nilearn import datasets, image, plotting
 from sklearn.utils import check_random_state
 from sklearn.model_selection import train_test_split
 import pickle
+import matplotlib.pyplot as plt
 
 # download oasis dataset
 oasis_dataset = datasets.fetch_oasis_vbm(n_subjects= 416)
@@ -50,8 +50,8 @@ def NIFTI_to_PNG(path_list, dir):
         os.makedirs(dir)
     except OSError:
         print("error")
-    #save the images as pngs
 
+    #save the images as pngs
     count = 0 # a count of the files saved so far
     for path in gm_img_paths:
         fig = plotting.plot_anat(path, display_mode = 'x', annotate= False, cut_coords = [40])
@@ -61,7 +61,7 @@ def NIFTI_to_PNG(path_list, dir):
 
 def load_data(dir):
     """
-    loads the neural images from the given dir
+    loads the neural images from the given directory
     Images are labled based on CDR
     gm_imgs and cdr_numpy_arr store the data for testing
     """
@@ -69,9 +69,9 @@ def load_data(dir):
     label_count = 0
     IMG_SIZE = 64
     for image in im_files_path:
-        img_array = cv2.imread(os.path.join(data_dir, image))
-        new_array = cv2.resize(img_array, (IMG_SIZE, IMG_SIZE))
-        gm_imgs.append(img_array)
+        img_array = cv2.imread(os.path.join(dir, image))
+        img_array_resized = cv2.resize(img_array, (IMG_SIZE, IMG_SIZE))
+        gm_imgs.append(img_array_resized)
 
         if(np.isnan(cdr_numpy_arr[label_count])):
              cdr_numpy_arr[label_count] = 1
@@ -80,28 +80,34 @@ def load_data(dir):
 
         label_count += 1
 
+def pickle_save(pythonOBJ, fileName):
+    """
+    :param  pythonOBJ:    Any python object
+    :param  string  file: the name of the file to save the object to
+    pickle_save:    Uses Pickle to save a python obj to a specified file
+    """
+    try:
+        pickle_out = open(fileName, "wb")
+        pickle.dump(pythonOBJ, pickle_out)
+        pickle_out.close()
+    except:
+        print("error: could not open " + fileName)
 
+#convert NIFTI images to png files
 NIFTI_to_PNG(gm_img_paths, data_dir)
+#load the png files back in as numpy arrays and
+# fill gm_imgs with these arrays
+#Also fill cdr_numpy_arr with the label for each image
 load_data(data_dir)
-
+#reshape the images to fit the model
+gm_imgs = np.array(gm_imgs).reshape(-1, 64, 64, 3)
 #Divide the data into training and testing sets
 rng = check_random_state(42)
 gm_imgs_train, gm_imgs_test, cdr_train, cdr_test = train_test_split(
     gm_imgs, cdr_numpy_arr, train_size=.7, random_state=rng)
 
 #save these 4 sets for reuse in model
-pickle_out = open("gm_imgs_train", "wb")
-pickle.dump(gm_imgs_train, pickle_out)
-pickle_out.close()
-
-pickle_out = open("gm_imgs_test", "wb")
-pickle.dump(gm_imgs_test, pickle_out)
-pickle_out.close()
-
-pickle_out = open("cdr_train", "wb")
-pickle.dump(cdr_train, pickle_out)
-pickle_out.close()
-
-pickle_out = open("cdr_test", "wb")
-pickle.dump(cdr_test, pickle_out)
-pickle_out.close()
+pickle_save(gm_imgs_train, "gm_imgs_train")
+pickle_save(gm_imgs_test, "gm_imgs_test")
+pickle_save(cdr_train, "cdr_train")
+pickle_save(cdr_test, "cdr_test")

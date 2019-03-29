@@ -15,7 +15,7 @@ from nilearn.input_data import NiftiMasker
 from nilearn.image import smooth_img
 import nibabel as nib
 import matplotlib.pyplot as plt
-
+import pickle
 
 classifier = Sequential()
 # convolution layer: weighted sum between two signals. Features are extracted at k x k sized matrices to calculate the convolution at a specific x, y location
@@ -35,38 +35,18 @@ classifier.add(Dense(units = 1, activation = 'sigmoid'))
 # compile
 classifier.compile(loss= 'binary_crossentropy', optimizer = 'Adam',metrics=['accuracy'])
 
+#Load the training data
+pickle_in = open ("gm_imgs_train", "rb")
+gm_imgs_train = pickle.load(pickle_in)
+pickle_in.close()
+pickle_in = open ("cdr_train", "rb")
+cdr_train = pickle.load(pickle_in)
+pickle_in.close()
 
-# download oasis dataset on working directory
-oasis_dataset = datasets.fetch_oasis_vbm(n_subjects= 10)
+#normalize the training data
+gm_imgs_train_normalized = gm_imgs_train/255
 
-#gm_imgs = np.array(oasis.gray_matter_maps)
-gray_matter_map_filenames = oasis_dataset.gray_matter_maps
-gm_img_paths = gray_matter_map_filenames
-gm_imgs = []
-for path in gm_img_paths:
-    img = nib.load(path)
-    img_array = img.get_fdata()
-    gm_imgs.append(img_array)
-print(gm_imgs[0].shape)
-print(gm_imgs[0])
-# create binary label by clinical dimentia rating (CDR)
-cdr = oasis_dataset.ext_vars['cdr'].astype(float)
-cdr_numpy_arr = np.array(cdr)
-for i in range(len(cdr_numpy_arr)):
-    if(np.isnan(cdr_numpy_arr[i])): cdr_numpy_arr[i] = 1
-
-    elif(cdr_numpy_arr[i] > 0.0): cdr_numpy_arr[i] = 1
-
-
-#divide data into training and test sets
-from sklearn.utils import check_random_state
-from sklearn.model_selection import train_test_split
-rng = check_random_state(42)
-
-gm_imgs = np.array(gm_imgs)
-gm_imgs_train, gm_imgs_test, cdr_train, cdr_test = train_test_split(
-    gm_imgs, cdr_numpy_arr, train_size=.7, random_state=rng)
-
+#fit the model with training data
 classifier.fit(gm_imgs_train, cdr_train, validation_split=0.1)
 
 
