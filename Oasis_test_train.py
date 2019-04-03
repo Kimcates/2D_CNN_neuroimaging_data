@@ -16,6 +16,7 @@ from sklearn.utils import check_random_state
 from sklearn.model_selection import train_test_split
 import pickle
 import matplotlib.pyplot as plt
+import pandas as pd
 
 # download oasis dataset
 oasis_dataset = datasets.fetch_oasis_vbm(n_subjects= 416)
@@ -27,13 +28,23 @@ gm_img_paths = gray_matter_map_filenames
 #the neural images to be trained and tested on the model
 gm_imgs = []
 
-#the cdr for each image
+#the cdr and mmse for each image
 #cdr: clinical dementia rating
-#cdr is used to establish a label (0 or 1) for each image
-#If a cdr is NAN or greater than 0, that nueral image
-# is classified as positive for dimentia
+#mmse: Mini-Mental State Exam
+#if subject's cdr is greater than 0.5 and mmse is
+# greater than 10, subject is positive for dimentia
 cdr = oasis_dataset.ext_vars['cdr'].astype(float)
+mmse = oasis_dataset.ext_vars['mmse'].astype(float)
 cdr_numpy_arr = np.array(cdr)
+mmse_numpy_arr = np.array(mmse)
+
+data = list(zip(cdr_numpy_arr, mmse_numpy_arr))
+
+df = pd.DataFrame(data, columns = ['cdr', 'mmse'])
+#all nan values can be replaced with 1 for the purpose of this model
+df = df.fillna(1)
+#target is the list of labels for the nueral images
+target=[]
 
 #the directory that the NIFTI images will be saved to
 data_dir = 'C:\\Nidata'
@@ -49,12 +60,17 @@ def NIFTI_to_PNG(path_list, dir):
     try:
         os.makedirs(dir)
     except OSError:
-        print("error")
+        print("error: directory already exists")
 
-    #save the images as pngs
+    #augment the images and save them as pngs
     count = 0 # a count of the files saved so far
     for path in gm_img_paths:
-        fig = plotting.plot_anat(path, display_mode = 'x', annotate= False, cut_coords = [40])
+        fig = plt.figure(figsize=(5, 7), facecolor='k')
+        img_crop = image.crop_img(img, rtol=1e-0001, copy=True)
+        display = plotting.plot_anat(img_crop, display_mode = 'z', cut_coords=[23], annotate = False, figure = fig)
+        display.add_contours(img_crop, contours=1, antialiased=False,linewidths= 1., levels=[0], colors=['red'])
+        display.add_contours(img_crop, contours=1, antialiased=False, linewidths=1., levels=[.3], colors=['blue'])
+        display.add_contours(img_crop, contours=1, antialiased=False, linewidths=1., levels=[.5], colors=['limegreen'])
         fig.savefig(dir + '\\' + 'brain' + str(count + 1) + '.png')
         count += 1
         fig.close()
@@ -66,19 +82,17 @@ def load_data(dir):
     gm_imgs and cdr_numpy_arr store the data for testing
     """
     im_files_path = os.listdir(dir)
-    label_count = 0
     IMG_SIZE = 64
     for image in im_files_path:
         img_array = cv2.imread(os.path.join(dir, image))
         img_array_resized = cv2.resize(img_array, (IMG_SIZE, IMG_SIZE))
         gm_imgs.append(img_array_resized)
 
-        if(np.isnan(cdr_numpy_arr[label_count])):
-             cdr_numpy_arr[label_count] = 1
-        elif(cdr_numpy_arr[label_count] > 0.0):
-            cdr_numpy_arr[label_count] = 1
-
-        label_count += 1
+        for row, column in df.iterrows():
+            if(column['cdr'] > 0.5 and column['mmse'] < 10):
+                target.append(1)
+            else:
+                target.append(0)
 
 def pickle_save(pythonOBJ, fileName):
     """

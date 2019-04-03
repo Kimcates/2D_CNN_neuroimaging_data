@@ -44,10 +44,11 @@ cdr_train = pickle.load(pickle_in)
 pickle_in.close()
 
 #normalize the training data
-gm_imgs_train_normalized = gm_imgs_train/255
-
+#gm_imgs_train_normalized = gm_imgs_train/255
+print(gm_imgs_train[0])
+print(gm_imgs_train[0].shape)
 #fit the model with training data
-classifier.fit(gm_imgs_train, cdr_train, validation_split=0.1)
+#classifier.fit(gm_imgs_train, cdr_train, validation_split=0.1)
 
 
 
