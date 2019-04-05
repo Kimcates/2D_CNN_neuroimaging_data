@@ -39,16 +39,16 @@ classifier.compile(loss= 'binary_crossentropy', optimizer = 'Adam',metrics=['acc
 pickle_in = open ("gm_imgs_train", "rb")
 gm_imgs_train = pickle.load(pickle_in)
 pickle_in.close()
-pickle_in = open ("cdr_train", "rb")
-cdr_train = pickle.load(pickle_in)
+pickle_in = open ("labels_train", "rb")
+labels_train = pickle.load(pickle_in)
 pickle_in.close()
 
 #normalize the training data
-#gm_imgs_train_normalized = gm_imgs_train/255
-print(gm_imgs_train[0])
-print(gm_imgs_train[0].shape)
+gm_imgs_train_normalized = gm_imgs_train/255
 #fit the model with training data
-#classifier.fit(gm_imgs_train, cdr_train, validation_split=0.1)
+classifier.fit(gm_imgs_train, cdr_train, validation_split=0.1)
+
+
 
 
 
