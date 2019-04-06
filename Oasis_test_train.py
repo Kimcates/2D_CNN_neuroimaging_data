@@ -145,7 +145,7 @@ def pickle_save(pythonOBJ, fileName):
         print("error: could not open " + fileName)
 
 #convert NIFTI objects to 3 png files each
-NIFTI_to_PNG(gm_img_paths, data_dir)
+#NIFTI_to_PNG(gm_img_paths, data_dir)
 #load the png files back in as a list of numpy arrays
 gm_imgs = load_images(data_dir)
 #load in labels for each image
