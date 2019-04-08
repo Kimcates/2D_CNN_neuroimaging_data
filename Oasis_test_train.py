@@ -42,7 +42,7 @@ df = pd.DataFrame(data, columns = ['cdr', 'mmse'])
 df = df.fillna(1)
 
 #the directory that the NIFTI images will be saved to
-data_dir = 'C:\\Nidata'
+data_dir = 'C:\\Nidata2'
 
 def NIFTI_to_PNG(path_list, dir):
     """
@@ -63,6 +63,7 @@ def NIFTI_to_PNG(path_list, dir):
     #augment the images and save them as pngs
     count = 0 # a count of the files saved so far
     for path in gm_img_paths:
+        """
         #first augmentation -- color
         fig = plt.figure(figsize=(5, 7), facecolor='k')
         img_crop_1 = image.crop_img(path, rtol=1e-0001, copy=True)
@@ -70,7 +71,7 @@ def NIFTI_to_PNG(path_list, dir):
         fig.savefig(dir + '\\' + 'brain' + str(count + 1) + '.png')
         count += 1
         plt.close(fig)
-
+        """
         # second augmentation -- added countours to color
         fig = plt.figure(figsize=(5, 7), facecolor='k')
         img_crop_2 = image.crop_img(path, rtol=1e-0001, copy=True)
@@ -81,7 +82,7 @@ def NIFTI_to_PNG(path_list, dir):
         fig.savefig(dir + '\\' + 'brain' + str(count + 1) + '.png')
         count += 1
         plt.close(fig)
-
+        """
         #third augmentation -- gray scale
         fig = plt.figure(figsize=(5, 7), facecolor='k')
         img_crop_3 = image.crop_img(path, rtol=1e-0001, copy=True)
@@ -89,7 +90,7 @@ def NIFTI_to_PNG(path_list, dir):
         fig.savefig(dir + '\\' + 'brain' + str(count + 1) + '.png')
         count += 1
         plt.close(fig)
-
+        """
 def load_images(dir):
     """
     return: list of nparrays: the list of nueral images
@@ -122,12 +123,12 @@ def load_labels(df):
     for row, column in df.iterrows():
         if(column['cdr'] > 0.5 and column['mmse'] < 10):
             target.append(1)
-            target.append(1)
-            target.append(1)
+            #target.append(1)
+            #target.append(1)
         else:
             target.append(0)
-            target.append(0)
-            target.append(0)
+            #target.append(0)
+            #target.append(0)
 
     return target
 
@@ -145,7 +146,7 @@ def pickle_save(pythonOBJ, fileName):
         print("error: could not open " + fileName)
 
 #convert NIFTI objects to 3 png files each
-#NIFTI_to_PNG(gm_img_paths, data_dir)
+NIFTI_to_PNG(gm_img_paths, data_dir)
 #load the png files back in as a list of numpy arrays
 gm_imgs = load_images(data_dir)
 #load in labels for each image
@@ -158,7 +159,7 @@ gm_imgs_train, gm_imgs_test, labels_train, labels_test = train_test_split(
     gm_imgs, labels, train_size=.7, random_state=rng)
 
 #save these 4 sets for reuse in model
-pickle_save(gm_imgs_train, "gm_imgs_train")
-pickle_save(gm_imgs_test, "gm_imgs_test")
-pickle_save(labels_train, "labels_train")
-pickle_save(labels_test, "labels_test")
+pickle_save(gm_imgs_train, "gm_imgs_train2")
+pickle_save(gm_imgs_test, "gm_imgs_test2")
+pickle_save(labels_train, "labels_train2")
+pickle_save(labels_test, "labels_test2")
